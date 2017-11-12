@@ -55,7 +55,7 @@ public:
 void background_task_as_function() {
 	try {
 			std::cout << "Hello, World! I'm background task that launched from a simple function" << std::endl;
-		}
+	}
 	catch (...) {
 		std::cout << __FILE__ << " (" << __LINE__ << ")" << ":" << __FUNCTION__
 				  << std::endl;
