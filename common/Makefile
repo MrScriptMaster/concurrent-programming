@@ -22,7 +22,7 @@ LIBS 	=
 L_LIBS	= -lstdc++
 #L_LIBS	= -lstdc++ -lshlwapi	# for windows
 LFLAGS	= -pipe -pthread
-APP	= thread
+APP	= test
 
 SOURCE_DIRS := .
 INCLUDES := .

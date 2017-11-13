@@ -62,7 +62,7 @@ void background_task_as_function() {
 	}
 }
  
-void Lesson_1::start() {
+void Lesson_1::start() const {
 	std::cout << "Lesson 1\nSimple threads\n" << std::endl;
 /* !========
  * Чтобы создать поток из функтора:
@@ -78,7 +78,7 @@ void Lesson_1::start() {
  * 
  * В этом примере мы просто отсоединяемся от потока, который был создан
  */
-	bt.detach();
+	my_thread.detach();
 /* На этом процесс создания отдельного потока заканчивается. */
 
 /* !========
@@ -86,15 +86,11 @@ void Lesson_1::start() {
  *
  * 1. Воспользуйтесь одной из следующих конструкций
  */
-	std::thread my_thread_1((background_task_as_function()));
+	std::thread my_thread_1(background_task_as_function);
 	my_thread_1.detach();
-	// ПРИМЕЧАНИЕ:
-	//  обратите внимание, чтобы вызываемая функция была заключена в пару скобок.
-	//  Это сделано потому, что без них компилятор воспринимает конструкцию как
-	//  вызов функции без параметров.
-	
+		
 	// Можно воспользоваться универсальным синтаксисом инициализации, введенным в С++11.
-	std::thread my_thread_2 {background_task_as_function()};
+	std::thread my_thread_2 {background_task_as_function};
 	my_thread_2.detach();
 	
 /* !========
@@ -110,7 +106,10 @@ void Lesson_1::start() {
 					  << std::endl;
 		}
 	});
-	my_thread_3.detach();
+	my_thread_3.join();
+        // ПРИМЕЧАНИЕ:
+        //  к последнему потоку мы присоединяемся, чтобы дать время завершиться фоновым потокам (хотя строго говоря
+        //  это не гарантированно).
 }
 
 //----------------------------------------------------------------
