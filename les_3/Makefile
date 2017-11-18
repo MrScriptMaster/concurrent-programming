@@ -5,7 +5,8 @@ L_LIBS	:= -lstdc++
 LFLAGS	:= -pipe -pthread
 
 INCLUDES := . ../common
-OBJECTS  := ../common/main.o
+OBJECTS  := ../common/main.o \
+            ../common/pseudo.o
             
 OBJECTS  += $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 
