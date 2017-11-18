@@ -9,6 +9,8 @@
 #define COMMON_THREAD_GUARD_H_
 
 #include <thread>
+#include <utility>
+#include <stdexcept>
 
 namespace Tools {
 
@@ -36,6 +38,32 @@ public:
 	thread_guard& operator= (thread_guard const&) =delete;
 
 }; // class thread_guard
+
+/*
+ * Следующий класс является улучшенной версией thread_guard, так как
+ * он позволяет получить права на передаваемый ему поток и полностью
+ * контроллировать время его существования.
+ */
+
+class scoped_thread {
+	std::thread _thr;
+
+public:
+	explicit scoped_thread(std::thread t)
+	: _thr(std::move(t))
+	{
+		if (!_thr.joinable())
+			throw std::logic_error("No thread");
+	}
+
+	virtual ~scoped_thread() {
+		_thr.join();
+	}
+
+	scoped_thread(scoped_thread const&) =delete;
+	scoped_thread& operator=(scoped_thread const&) =delete;
+
+}; // class scoped_thread
 
 } // namespace Tools
 
