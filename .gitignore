@@ -1,2 +1,6 @@
 bin/**
 */**/*.[od]
+.settings/
+.cproject
+.project
+language.settings.xml

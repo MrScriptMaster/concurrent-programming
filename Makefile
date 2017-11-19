@@ -1,7 +1,8 @@
 
 LESSONS := lesson_1 \
 	   lesson_2 \
-	   lesson_3
+	   lesson_3 \
+	   lesson_4
 MAKE := 
 
 all: make_main $(LESSONS)
@@ -17,3 +18,6 @@ lesson_2:
 
 lesson_3:
 	make --directory=les_3
+	
+lesson_4:
+	make --directory=les_4
