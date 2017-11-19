@@ -23,13 +23,25 @@ public:
  */
 
 class Example_1 : public Example {
+	// Стандартный список библиотеки STL не поддерживает многопоточности, поэтому нужно
+	// предпринять меры, чтобы его в один момент времени нельзя было бы
+	// и читать и редактировать.
 	std::list<int> m_List;
+	// Этот мьютекс защищает список m_List от использования его разными потоками
 	std::mutex m_ListMitex;
 	int RIGHT_EDGE;
 
+	/*
+	 * ПРИМЕЧАНИЕ:
+	 * Очень важно, чтобы доступ к списку не был осуществлен в обход захвата мьютекса, иначе
+	 * неизбежны ошибки. Никогда нельзя открывать к защищенным объектом доступ другим объектам ни в виде
+	 * изменения видимости членов класса, ни через методы класса.
+	 */
+
 public:
 	void demonstrate() {
-		std::cout << "Example 1" << std::endl << "Example demonstrates using of a mutex for adding and searching elements in the list from two routines" << std::endl;
+		std::cout << "Example 1" << std::endl << "Example demonstrates using of a mutex "
+			"for adding and searching elements in the list from two routines" << std::endl;
 
 		using namespace Tools;
 		// запускаем поток для поиска. Запускаем его немного пораньше
@@ -52,7 +64,7 @@ public:
 	void addToList(int new_num) {
 		/*
 		 * Мы используем встроенный класс lock_guard, который захватывает мьютекс, если он
-		 * не занят, и освобождает его, когда удаляется. Если мьютекс уже кем то занят, то
+		 * не занят, и освобождает его, когда вызывается деструктор. Если мьютекс уже кем то занят, то
 		 * поток блокируется на нем.
 		 */
 		std::lock_guard<std::mutex> guard(m_ListMitex);
@@ -65,13 +77,17 @@ public:
 	 * закончился.
 	 */
 	bool list_contains(int value_to_find) {
+		/*
+		 * Здесь мы также закхватываем мьютекс, чтобы во время поиска
+		 * потоку никто не мешал.
+		 */
 		std::lock_guard<std::mutex> guard(m_ListMitex);
 		return std::find(m_List.begin(), m_List.end(), value_to_find) != m_List.end();
 	}
 
 	void routine_thread_1() {
 		/*
-		 * В этом потоке мы будем генерировать числа в списке
+		 * Этот метод мы будем исполнять в потоке, чтобы порождать элементы в списке.
 		 */
 		for (int i = 0; i <= RIGHT_EDGE; i++) {
 			addToList(i);
