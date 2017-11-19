@@ -29,6 +29,8 @@ class Example_1 : public Example {
 
 public:
 	void demonstrate() {
+		std::cout << "Example 1" << std::endl << "Example demonstrates using of a mutex for adding and searching elements in the list from two routines" << std::endl;
+
 		using namespace Tools;
 		// запускаем поток для поиска. Запускаем его немного пораньше
 		scoped_thread start_searching_routine(std::thread(&Example_1::routine_thread_2, this));
