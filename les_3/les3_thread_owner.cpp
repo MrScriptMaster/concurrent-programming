@@ -11,6 +11,7 @@ using namespace Tools;
 class Lesson_3 : public Application {
 public:
 	void start() const;
+        void stop() const;
 
 };
 
@@ -81,6 +82,11 @@ void Lesson_3::start() const {
 	 * система. Значение является лишь рекомендацией.
 	 */
 	std::cout << "This system accepts " << std::thread::hardware_concurrency() << " thread(s)" << std::endl;
+}
+
+/*virtual*/
+void Lesson_3::stop() const {
+    std::cout << std::endl;
 }
 
 //----------------------------------------------------------------
