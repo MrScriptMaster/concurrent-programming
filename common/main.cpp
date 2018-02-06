@@ -4,20 +4,22 @@
 #include <iostream>
 #include <string>
 
-Tools::Application *app = NULL;
+namespace {
+    Tools::Application *app = NULL;
 
-class BadInit : public std::bad_exception {
-	std::string message;
-public:
-	BadInit() 
-	: std::bad_exception()
-	{
-		message = "application is not initialized";
-	}
-	const char* what() const noexcept {
-		return message.c_str();
-	}
-}; // class BadInit
+    class BadInit : public std::bad_exception {
+            std::string message;
+    public:
+            BadInit() 
+            : std::bad_exception()
+            {
+                    message = "application is not initialized";
+            }
+            const char* what() const noexcept {
+                    return message.c_str();
+            }
+    }; // class BadInit
+}   // namespace
 
 using namespace Tools;
 
