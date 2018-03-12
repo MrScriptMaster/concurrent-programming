@@ -163,7 +163,9 @@ class Example_2 : public Example {
 			if (&lhs == &rhs)
 				return;
 			// захватываем мьютексы в процедуре
-			std::lock(lhs.m_Mutex,rhs.m_Mutex);
+			std::cout << " [" << std::this_thread::get_id << "]:"
+                                  << " waiting for mutexes" << std::endl;
+                        std::lock(lhs.m_Mutex,rhs.m_Mutex);
 			/*
 			 * Чтобы передать объектам типа guard права на мьютексы, 
 			 * мы используем параметр std::adopt_lock. Без него guard попытался 
@@ -171,8 +173,18 @@ class Example_2 : public Example {
 			 */
 			std::lock_guard<std::mutex> lock_a(lhs.m_Mutex,std::adopt_lock);
 			std::lock_guard<std::mutex> lock_b(rhs.m_Mutex,std::adopt_lock);
+                        std::cout << " [" << std::this_thread::get_id << "]:"
+                                  << " mutexes catched" << std::endl;
 			swapper(lhs.m_Object,rhs.m_Object);
+                        std::cout << " [" << std::this_thread::get_id << "]:"
+                                  << lhs.getString() << "<>" << rhs.getString() << std::endl;
+                        std::cout << " [" << std::this_thread::get_id << "]:"
+                                  << " free mutexes" << std::endl;
 		}
+	private:	
+		std::string getString() const {
+                    return std::string(m_Object.getName());
+                }
 	}; // class SwapProcessor
 public:
 	void demonstrate() {
@@ -186,10 +198,36 @@ public:
 		scoped_thread r1(std::thread(&Example_2::routine, this));
 		// запускаем второй поток
 		scoped_thread r2(std::thread(&Example_2::routine, this));
+                
+                //scoped_thread r3(std::thread(&Example_2::routine, this));
+                //scoped_thread r4(std::thread(&Example_2::routine, this));
 	}
+	
+	// конструктор
+	Example_2()
+        : data_1(NULL),
+          data_2(NULL)
+        {
+            data_1 = new SwapProcessor(SomeBigObject("Alpha"));
+            data_2 = new SwapProcessor(SomeBigObject("Bravo"));
+        }
+	
+	//деструктор
+	~Example_2() {
+            if (data_1)
+                delete data_1;
+            if (data_2)
+                delete data_2;
+        }
 private:
-	void routine() {
-		//sp1.swap(sp1,sp2);
+	/*
+         * Для примера мы создадим данные здесь
+         */
+        SwapProcessor *data_1,
+                      *data_2;
+        void routine() {
+            std::cout << "Start new routine id = " << std::this_thread::get_id << std::endl;
+            swap(*data_1,*data_2);
 	} 
 };	// class Example_2
  
