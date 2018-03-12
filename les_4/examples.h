@@ -6,6 +6,7 @@
 #include <mutex>
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 #include "thread_guard.h"
 
@@ -108,4 +109,88 @@ protected:
 
 }; // class Example_1
 
+//------------------------------------------------------------------
+
+/*
+ * На практике иногда приходится захватывать несколько мьютексов за один раз.
+ * Чтобы избежать возможной взимоблокировки между потоками, которые могут захватывать
+ * по несколько мьютексов за один раз, следует придерживаться следующих рекомендаций:
+ *	1. Захватывать и освобождать мьютексы всегда в одном и том же порядке.
+ *	2. Пытаться захватить все необходимые для процедуры мьютексы, а если это не удается сделать, прервать выполнение порцедуры.
+ *	
+ * В следующем примере показан класс, который вызывает дружественную ему процедуру, которая ничего не делает, но предполагается,
+ * что для ее работы оба аргумента должны сохранять свою целостность.
+ */
+
+class SomeBigObject {
+	std::string m_Name;
+public:
+	SomeBigObject(const char* str)
+	: m_Name(str)
+	{}
+	
+	const std::string& getName() const {
+		return m_Name;
+	}
+	
+	void setName(const std::string& str) {
+		m_Name = str;
+	}
+};	// class SomeBigObject
+
+/*
+ * Для примера этот метод делает обмен именами между объектами
+ * класса SomeBigObject
+ */
+void swapper(SomeBigObject& lhs, SomeBigObject& rhs) {
+	std::string buffer(lhs.getName());
+	lhs.setName(rhs.getName());
+	rhs.setName(buffer);
+	std::cout << " swapped" << std::endl;
+}
+
+class Example_2 : public Example {	
+	class SwapProcessor {
+		SomeBigObject  m_Object;
+		std::mutex     m_Mutex;
+	public:
+		SwapProcessor(SomeBigObject const& obj)
+		: m_Object(obj)
+		{}
+		friend void swap(SwapProcessor& lhs, SwapProcessor& rhs) {
+			// Чтобы случайно не звахватить мьютекс дважды, мы
+			// проверяем, что оба аргумента не ссылаются на одно и то же
+			if (&lhs == &rhs)
+				return;
+			// захватываем мьютексы в процедуре
+			std::lock(lhs.m_Mutex,rhs.m_Mutex);
+			/*
+			 * Чтобы передать объектам типа guard права на мьютексы, 
+			 * мы используем параметр std::adopt_lock. Без него guard попытался 
+			 * бы захватить мьютекс снова
+			 */
+			std::lock_guard<std::mutex> lock_a(lhs.m_Mutex,std::adopt_lock);
+			std::lock_guard<std::mutex> lock_b(rhs.m_Mutex,std::adopt_lock);
+			swapper(lhs.m_Object,rhs.m_Object);
+		}
+	}; // class SwapProcessor
+public:
+	void demonstrate() {
+		/*
+		 * В этом примере два потока попытаются вызвать swapper для одних и тех же данных
+		 */
+		std::cout << "Example 2" << std::endl << "Catch two mutexes" << std::endl;
+		
+		using namespace Tools;
+		// запускаем первый поток
+		scoped_thread r1(std::thread(&Example_2::routine, this));
+		// запускаем второй поток
+		scoped_thread r2(std::thread(&Example_2::routine, this));
+	}
+private:
+	void routine() {
+		//sp1.swap(sp1,sp2);
+	} 
+};	// class Example_2
+ 
 #endif /* LES_4_EXAMPLES_H_ */
